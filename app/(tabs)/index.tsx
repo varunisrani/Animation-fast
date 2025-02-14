@@ -1,74 +1,213 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import React, { useRef } from 'react';
+import { StyleSheet, View, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import type { View as ViewType } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Logo from '@/components/Logo';
+
+const { width } = Dimensions.get('window');
+
+// Create a ref that can be accessed from splash screen
+export const centerButtonRef = { current: null as any }; // Using any for the ref to allow measure function
+
+const DateButton = ({ label, isActive }: { label: string; isActive?: boolean }) => (
+  <TouchableOpacity 
+    style={[
+      styles.dateButton,
+      isActive && styles.activeDateButton
+    ]}
+  >
+    <ThemedText style={[styles.dateButtonText, isActive && styles.activeDateButtonText]}>
+      {label}
+    </ThemedText>
+  </TouchableOpacity>
+);
+
+const RaceMeetingCard = () => (
+  <View style={styles.raceCard}>
+    <View style={styles.raceCardContent}>
+      {/* Race meeting content will go here */}
+    </View>
+  </View>
+);
+
+const TabBarIcon = ({ name, label, isActive, isCenter }: { name: any; label: string; isActive?: boolean; isCenter?: boolean }) => (
+  <TouchableOpacity 
+    style={[styles.tabBarItem, isCenter && styles.centerTabItem]}
+    ref={isCenter ? (ref) => { 
+      if (ref) {
+        centerButtonRef.current = ref;
+      }
+    } : null}
+  >
+    {isCenter ? (
+      <View style={styles.centerButton}>
+        <Logo width={40} height={40} />
+      </View>
+    ) : (
+      <>
+        <Ionicons name={name} size={24} color={isActive ? '#4B0082' : '#666'} />
+        <ThemedText style={[styles.tabLabel, isActive && styles.activeTabLabel]}>{label}</ThemedText>
+      </>
+    )}
+  </TouchableOpacity>
+);
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#4B0082', '#800080']}
+        style={styles.header}
+      >
+        <View style={styles.headerContent}>
+          <ThemedText style={styles.title}>RACE MEETINGS</ThemedText>
+          <Ionicons name="settings-outline" size={24} color="white" style={styles.settingsIcon} />
+        </View>
+        
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dateButtonsContainer}
+        >
+          <DateButton label="TODAY" isActive />
+          <DateButton label="TOMORROW" />
+          <DateButton label="THU 02" />
+          <DateButton label="FRI 03" />
+          <DateButton label="SAT 04" />
+        </ScrollView>
+      </LinearGradient>
+
+      <ScrollView style={styles.content}>
+        <RaceMeetingCard />
+        <RaceMeetingCard />
+        <RaceMeetingCard />
+        <RaceMeetingCard />
+        <RaceMeetingCard />
+      </ScrollView>
+
+      <View style={styles.tabBar}>
+        <TabBarIcon name="cube-outline" label="Meetings" isActive />
+        <TabBarIcon name="analytics-outline" label="Predictions" />
+        <TabBarIcon name="person-outline" label="Hey Buddy" isCenter />
+        <TabBarIcon name="stats-chart-outline" label="Results" />
+        <TabBarIcon name="ticket-outline" label="Betslip" />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 15,
+  },
+  headerContent: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 20,
+    marginBottom: 15,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  settingsIcon: {
+    marginLeft: 'auto',
+  },
+  dateButtonsContainer: {
+    paddingHorizontal: 15,
+    gap: 10,
+  },
+  dateButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  activeDateButton: {
+    backgroundColor: '#9932CC',
+  },
+  dateButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  activeDateButtonText: {
+    color: 'white',
+  },
+  content: {
+    flex: 1,
+    padding: 15,
+  },
+  raceCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginBottom: 15,
+    height: 120,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  raceCardContent: {
+    padding: 15,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+  },
+  tabBarItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerTabItem: {
+    marginTop: -45,
     position: 'absolute',
+    left: '50%',
+    transform: [{
+      translateX: -30
+    }]
+  },
+  centerButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#4B0082',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  tabLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#666',
+  },
+  activeTabLabel: {
+    color: '#4B0082',
   },
 });
